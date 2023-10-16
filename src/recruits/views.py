@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.db.models import Q
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.pagination import PageNumberPagination
@@ -28,3 +29,11 @@ class RecruitViewSet(ModelViewSet):
             return RecruitCreateSerializer
 
         return super().get_serializer_class()
+
+    def get_queryset(self):
+
+        skill = self.request.query_params.get("skill", "")
+        position = self.request.query_params.get("position", "")
+        return Recruit.objects.filter(
+            Q(skill__contains=skill) & Q(position__contains=position)
+        )
