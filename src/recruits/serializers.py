@@ -1,4 +1,8 @@
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
+from rest_framework.serializers import (
+    ModelSerializer,
+    PrimaryKeyRelatedField,
+    SerializerMethodField,
+)
 
 from .models import Company, Recruit, Application
 
@@ -28,10 +32,16 @@ class RecruitDetailSerializer(ModelSerializer):
     company = CompanySerializer(read_only=True)
 
     # TODO : method field for other recruits
+    other_recruits = SerializerMethodField()
 
     class Meta:
         model = Recruit
         fields = "__all__"
+
+    def get_other_recruits(self, obj):
+        return [
+            r.pk for r in Recruit.objects.filter(company=obj.company) if r.pk != obj.pk
+        ]
 
 
 class RecruitCreateSerializer(ModelSerializer):
