@@ -57,6 +57,7 @@ class RecruitCreateSerializer(ModelSerializer):
         fields = (
             "title",
             "skill",
+            "company",
             "position",
             "description",
         )

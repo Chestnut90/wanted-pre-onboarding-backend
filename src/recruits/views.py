@@ -32,12 +32,14 @@ class RecruitViewSet(ModelViewSet):
         return super().get_serializer_class()
 
     def get_queryset(self):
+        if self.action in ["retrieve"]:
 
-        skill = self.request.query_params.get("skill", "")
-        position = self.request.query_params.get("position", "")
-        return Recruit.objects.filter(
-            Q(skill__contains=skill) & Q(position__contains=position)
-        )
+            skill = self.request.query_params.get("skill", "")
+            position = self.request.query_params.get("position", "")
+            return Recruit.objects.filter(
+                Q(skill__contains=skill) & Q(position__contains=position)
+            )
+        return super().get_queryset()
 
     @action(
         methods=["post"],

@@ -1,13 +1,13 @@
 from django.test import TestCase
 from django.db.utils import IntegrityError
 
-from django.contrib.auth.models import User
-
 from ..models import (
     Company,
     Recruit,
     Application,
 )
+
+from users.models import User
 
 
 class ApplicationTestCase(TestCase):

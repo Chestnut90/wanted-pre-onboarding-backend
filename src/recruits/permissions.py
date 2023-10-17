@@ -1,4 +1,7 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.permissions import (
+    BasePermission,
+    SAFE_METHODS,
+)
 
 
 class IsManagerOrReadOnly(BasePermission):
@@ -7,9 +10,17 @@ class IsManagerOrReadOnly(BasePermission):
     """
 
     def has_permission(self, request, view):
-        # post, update, delete for only manager
         return bool(
-            request.method in SAFE_METHODS or (request.user and request.user.is_manager)
+            request.method in SAFE_METHODS
+            or (request.user and getattr(request.user, "is_manager", False))
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return bool(
+            request.method in SAFE_METHODS
+            or (
+                request.user and (getattr(obj.company, "manager", None) == request.user)
+            )
         )
 
 
@@ -22,5 +33,9 @@ class IsNotManagerOnlyOrReadOnly(BasePermission):
 
         return bool(
             request.method in SAFE_METHODS
-            or (request.user and not request.user.is_manager)
+            or (
+                request.user
+                and request.user.is_authenticated
+                and not getattr(request.user, "is_manager", False)
+            )
         )
