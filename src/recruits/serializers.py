@@ -2,6 +2,7 @@ from rest_framework.serializers import (
     ModelSerializer,
     PrimaryKeyRelatedField,
     SerializerMethodField,
+    ValidationError,
 )
 
 from .models import Company, Recruit, Application
@@ -64,3 +65,15 @@ class ApplicationSerializer(ModelSerializer):
     class Meta:
         model = Application
         fields = "__all__"
+
+    def validate(self, attrs):
+
+        user = attrs["user"]
+        recruit = attrs["recruit"]
+        try:
+            Application.objects.get(user=user, recruit=recruit)
+            raise ValidationError("already submitted recruit.")
+        except Application.DoesNotExist:
+            # no error
+            pass
+        return super().validate(attrs)
