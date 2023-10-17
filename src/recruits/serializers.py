@@ -16,7 +16,7 @@ class CompanySerializer(ModelSerializer):
 
 class RecruitSimpleSerializer(ModelSerializer):
 
-    company = CompanySerializer(read_only=True)
+    company = SerializerMethodField()  # replace object to string
 
     class Meta:
         model = Recruit
@@ -28,9 +28,12 @@ class RecruitSimpleSerializer(ModelSerializer):
             "position",
         )
 
+    def get_company(self, obj):
+        return str(obj.company)
+
 
 class RecruitDetailSerializer(ModelSerializer):
-    company = CompanySerializer(read_only=True)
+    company = SerializerMethodField()
 
     # TODO : method field for other recruits
     other_recruits = SerializerMethodField()
@@ -39,6 +42,9 @@ class RecruitDetailSerializer(ModelSerializer):
         model = Recruit
         fields = "__all__"
 
+    def get_company(self, obj):
+        return str(obj.company)
+
     def get_other_recruits(self, obj):
         return [
             r.pk for r in Recruit.objects.filter(company=obj.company) if r.pk != obj.pk
@@ -46,19 +52,19 @@ class RecruitDetailSerializer(ModelSerializer):
 
 
 class RecruitCreateSerializer(ModelSerializer):
-    company = PrimaryKeyRelatedField(
-        label="primary key of company", queryset=Company.objects.all()
-    )
-
     class Meta:
         model = Recruit
         fields = (
             "title",
-            "company",
             "skill",
             "position",
             "description",
         )
+        read_only_fields = ("company",)
+
+    def create(self, validated_data):
+        validated_data["company"] = self.context["request"].user.company
+        return super().create(validated_data)
 
 
 class ApplicationSerializer(ModelSerializer):
@@ -67,7 +73,6 @@ class ApplicationSerializer(ModelSerializer):
         fields = "__all__"
 
     def validate(self, attrs):
-
         user = attrs["user"]
         recruit = attrs["recruit"]
         try:

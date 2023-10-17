@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -22,6 +21,14 @@ class Company(TimeTrackingModelBase):
     """
 
     name = models.TextField(max_length=100)
+
+    # TODO : not null ?
+    manager = models.OneToOneField(
+        "users.User", on_delete=models.CASCADE, null=True, related_name="company"
+    )
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Recruit(TimeTrackingModelBase):
@@ -58,7 +65,7 @@ class Application(TimeTrackingModelBase):
         ]
 
     user = models.ForeignKey(
-        User,
+        "users.User",
         on_delete=models.CASCADE,
         related_name="users",
     )
